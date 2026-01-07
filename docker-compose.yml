@@ -1,0 +1,72 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: malifax-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27018}:27017"  # Configurable external port (default: 27018 to avoid conflicts)
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-malifax}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - malifax-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/malifax --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./malifax-api
+      dockerfile: Dockerfile
+    container_name: malifax-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-4200}:4000"  # Configurable external port (default: 4200 to avoid conflicts)
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-admin123}@mongodb:27017/${MONGO_DB:-malifax}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - malifax-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build:
+      context: ./malifax
+      dockerfile: Dockerfile
+    container_name: malifax-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3080}:3000"  # External:Internal mapping
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4200}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - malifax-network
+
+networks:
+  malifax-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
