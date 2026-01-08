@@ -17,7 +17,7 @@ cp .env.example .env
 docker-compose up -d
 
 # 4. Seed database with default data (first time only)
-./scripts/reset-db.sh
+./docker.sh  # Select option 8
 
 # 5. Access application
 open http://localhost:3080

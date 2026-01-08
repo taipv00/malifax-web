@@ -139,11 +139,87 @@ seed_database() {
           { id: 4, title: 'Ubiquiti', description: 'Enterprise networking and security unified platform.', logo_src: '/svgs/Ubiquiti.svg', logo_alt: 'Ubiquiti Logo', order_index: 4 }
         ];
 
-        await Data.deleteMany({ key: { \$in: ['partners', 'shop-products'] } });
+        const defaultLogoGrids = [
+          {
+            pageKey: 'business-continuity',
+            pageName: 'Business Continuity',
+            desktopLayout: [
+              { position: 3, src: '/svgs/solution/business-i1.svg', alt: 'Logo 1', size: 1, website_url: 'https://business1.com' },
+              { position: 8, src: '/svgs/solution/business-i2.svg', alt: 'Logo 2', size: 2, website_url: 'https://business2.com' },
+              { position: 13, src: '/svgs/solution/business-i3.svg', alt: 'Logo 3', size: 1, website_url: 'https://business3.com' },
+              { position: 18, src: '/svgs/solution/business-i4.svg', alt: 'Logo 4', size: 2, website_url: 'https://business4.com' },
+              { position: 23, src: '/svgs/solution/business-i5.svg', alt: 'Logo 5', size: 1, website_url: 'https://business5.com' },
+              { position: 26, src: '/svgs/solution/business-i6.svg', alt: 'Logo 6', size: 2, website_url: 'https://business6.com' },
+              { position: 29, src: '/svgs/solution/business-i7.svg', alt: 'Logo 7', size: 1, website_url: 'https://business7.com' },
+              { position: 33, src: '/svgs/solution/business-i8.svg', alt: 'Logo 8', size: 2, website_url: 'https://business8.com' },
+            ],
+            totalSlots: 36
+          },
+          {
+            pageKey: 'cctv-door-access',
+            pageName: 'CCTV Door Access',
+            desktopLayout: [
+              { position: 3, src: '/svgs/solution/cctv-i1.svg', alt: 'Logo 1', size: 1, website_url: 'https://cctv1.com' },
+              { position: 8, src: '/svgs/solution/cctv-i2.svg', alt: 'Logo 2', size: 2, website_url: 'https://cctv2.com' },
+              { position: 17, src: '/svgs/solution/cctv-i3.svg', alt: 'Logo 3', size: 2, website_url: 'https://cctv3.com' },
+            ],
+            totalSlots: 24
+          },
+          {
+            pageKey: 'equipment-rental',
+            pageName: 'Equipment Rental',
+            desktopLayout: [
+              { position: 3, src: '/svgs/solution/rental-i1.svg', alt: 'Logo 1', size: 1, website_url: 'https://rental1.com' },
+              { position: 10, src: '/svgs/solution/rental-i2.svg', alt: 'Logo 2', size: 1, website_url: 'https://rental2.com' },
+              { position: 16, src: '/svgs/solution/rental-i3.svg', alt: 'Logo 3', size: 1, website_url: 'https://rental3.com' },
+              { position: 32, src: '/svgs/solution/rental-i4.svg', alt: 'Logo 4', size: 1, website_url: 'https://rental4.com' },
+            ],
+            totalSlots: 36
+          },
+          {
+            pageKey: 'enterprise-cloud',
+            pageName: 'Enterprise Cloud',
+            desktopLayout: [
+              { position: 3, src: '/svgs/solution/cloud-i1.svg', alt: 'Logo 1', size: 1, website_url: 'https://cloud1.com' },
+              { position: 8, src: '/svgs/solution/cloud-i2.svg', alt: 'Logo 2', size: 2, website_url: 'https://cloud2.com' },
+              { position: 15, src: '/svgs/solution/cloud-i3.svg', alt: 'Logo 3', size: 1, website_url: 'https://cloud3.com' },
+            ],
+            totalSlots: 27
+          },
+          {
+            pageKey: 'networking-wifi',
+            pageName: 'Networking WiFi',
+            desktopLayout: [
+              { position: 3, src: '/svgs/solution/networking-i1.svg', alt: 'Logo 1', size: 1 },
+              { position: 8, src: '/svgs/solution/networking-i2.svg', alt: 'Logo 2', size: 2 },
+              { position: 15, src: '/svgs/solution/networking-i3.svg', alt: 'Logo 3', size: 1 },
+              { position: 20, src: '/svgs/solution/networking-i4.svg', alt: 'Logo 4', size: 2 },
+              { position: 25, src: '/svgs/solution/networking-i5.svg', alt: 'Logo 5', size: 1 },
+              { position: 30, src: '/svgs/solution/networking-i6.svg', alt: 'Logo 6', size: 2 },
+              { position: 35, src: '/svgs/solution/networking-i7.svg', alt: 'Logo 7', size: 2 },
+            ],
+            totalSlots: 36
+          }
+        ];
+
+        // Clear existing data
+        const keysToDelete = ['partners', 'shop-products', 'business-continuity', 'cctv-door-access', 'equipment-rental', 'enterprise-cloud', 'networking-wifi'];
+        await Data.deleteMany({ key: { \$in: keysToDelete } });
+
+        // Insert partners data
         await Data.create({ key: 'partners', data: JSON.stringify(defaultPartners) });
         console.log(\`✅ Partners data created (\${defaultPartners.length} partners)\`);
+
+        // Insert shop products data
         await Data.create({ key: 'shop-products', data: JSON.stringify(defaultShopProducts) });
         console.log(\`✅ Shop products data created (\${defaultShopProducts.length} products)\`);
+
+        // Insert logo grids data
+        for (const page of defaultLogoGrids) {
+          await Data.create({ key: page.pageKey, data: JSON.stringify(page) });
+        }
+        console.log(\`✅ Logo grids data created (\${defaultLogoGrids.length} pages)\`);
+
         console.log('✅ Database seeded successfully!');
         process.exit(0);
       } catch (error) {
