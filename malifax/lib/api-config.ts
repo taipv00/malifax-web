@@ -8,9 +8,9 @@ const getBaseUrl = () => {
   }
 
   // Default: Use localhost for both development and Docker
-  // Docker: Browser connects to host machine's localhost:4000
-  // Local dev: Direct connection to localhost:4000
-  return 'http://localhost:4000';
+  // Docker: Browser connects to host machine's localhost:4200
+  // Local dev: Direct connection to localhost:4200
+  return 'http://localhost:4200';
 };
 
 export const API_CONFIG = {
